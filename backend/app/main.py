@@ -1,7 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-import os
 
 from app.routes import interview, evaluation, user
 from app.database.db import init_db
@@ -31,7 +29,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     init_db()
-    print("✅ Database initialized")
+    print("✅ Backend initialized")
 
 # Include routers
 app.include_router(interview.router, prefix="/api/interviews", tags=["interviews"])

@@ -1,4 +1,3 @@
-import 'react-hot-toast/dist/react-hot-toast.css';
 import '../styles/globals.css';
 import { Toaster } from 'react-hot-toast';
 

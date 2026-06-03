@@ -11,7 +11,7 @@ interview_service = InterviewService()
 async def start_interview(interview: schemas.InterviewCreate, db: Session = Depends(get_db)):
     """Start a new interview session"""
     try:
-        new_interview = interview_service.create_interview(db, interview)
+        new_interview = await interview_service.create_interview(db, interview)
         return new_interview
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

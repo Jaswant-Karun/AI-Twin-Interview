@@ -4,24 +4,49 @@
 
 ### Phase 1: Setup (10 minutes)
 
-```bash
-# 1. Copy environment files
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env.local
+```powershell
+# 1. Copy the backend env template
+Copy-Item backend/.env.example backend/.env
 
 # 2. Add your API keys to backend/.env
-# - OPENAI_API_KEY or GEMINI_API_KEY
-# - DATABASE_URL (if not using docker)
+# - OPENAI_API_KEY and/or GEMINI_API_KEY
+# - DATABASE_URL defaults to local Postgres (adjust credentials if needed)
 ```
 
-### Phase 2: Database Setup (5 minutes)
+### Phase 2: Postgres Database Setup (5 minutes)
 
-```bash
-# Using Docker (Recommended)
-docker-compose up -d postgres
+**On Windows:**
 
-# Or manually start PostgreSQL and update DATABASE_URL
-```
+1. Install PostgreSQL 16:
+   - Download from [`https://www.postgresql.org/download/windows/`](https://www.postgresql.org/download/windows/)
+   - Use default port 5432
+   - Set a superuser password
+
+2. Create the database and user:
+
+   ```powershell
+   psql -U postgres
+   ```
+
+   Then in psql:
+
+   ```sql
+   CREATE USER interview_user WITH PASSWORD 'interview_password';
+   CREATE DATABASE ai_interview_db OWNER interview_user;
+   GRANT ALL PRIVILEGES ON DATABASE ai_interview_db TO interview_user;
+   ```
+
+3. Verify connection:
+
+   ```powershell
+   psql -h localhost -U interview_user -d ai_interview_db
+   ```
+
+4. If you used different credentials, update `backend/.env`:
+
+   ```env
+   DATABASE_URL=postgresql+psycopg://your_user:your_password@localhost:5432/your_db
+   ```
 
 ### Phase 3: Backend Development (3-4 hours)
 
@@ -37,11 +62,12 @@ docker-compose up -d postgres
 
 **Command to start:**
 
-```bash
+```powershell
 cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+python -m venv .venv
+.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+$env:PYTHONPATH='.'
 uvicorn app.main:app --reload
 ```
 
@@ -57,10 +83,20 @@ uvicorn app.main:app --reload
 
 **Command to start:**
 
-```bash
+```powershell
 cd frontend
 npm install
 npm run dev
+```
+
+### AI Connectivity Check
+
+Run this after adding keys to `backend/.env`:
+
+```powershell
+cd backend
+$env:PYTHONPATH='.'
+python scripts/test_connectivity.py
 ```
 
 ### Phase 5: Integration & Testing (1-2 hours)

@@ -1,8 +1,11 @@
 from sqlalchemy.orm import Session
 from app.models import models
 import json
+from app.services.ai_service import AIService
 
 class EvaluationService:
+    def __init__(self):
+        self.ai_service = AIService()
     
     async def evaluate_answer(self, interview_id: int, question_id: int, answer_text: str, db: Session):
         """Evaluate user's answer"""
@@ -10,17 +13,26 @@ class EvaluationService:
         question = db.query(models.Question).filter(
             models.Question.id == question_id
         ).first()
+        interview = db.query(models.Interview).filter(
+            models.Interview.id == interview_id
+        ).first()
+
+        role = interview.role if interview else "interview candidate"
+        ai_result = await self.ai_service.evaluate_answer(
+            question.question_text if question else "",
+            answer_text,
+            role,
+        )
         
-        # Placeholder scores - integrate with AI service
         evaluation = models.Evaluation(
             interview_id=interview_id,
             question_id=question_id,
             answer_id=None,
-            technical_score=75.0,
-            communication_score=80.0,
-            confidence_score=85.0,
-            overall_score=80.0,
-            feedback="Good response with clear explanation."
+            technical_score=ai_result["technical_score"],
+            communication_score=ai_result["communication_score"],
+            confidence_score=ai_result["confidence_score"],
+            overall_score=ai_result["overall_score"],
+            feedback=ai_result["feedback"]
         )
         db.add(evaluation)
         db.commit()

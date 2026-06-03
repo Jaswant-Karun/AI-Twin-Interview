@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
-        "postgresql://interview_user:interview_password@localhost:5432/ai_interview_db"
+        "postgresql+psycopg://interview_user:interview_password@localhost:5432/ai_interview_db"
     )
     
     # APIs

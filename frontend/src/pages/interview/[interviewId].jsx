@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import QuestionCard from '../components/QuestionCard';
-import ResultCard from '../components/ResultCard';
-import { useInterviewStore } from '../services/interviewStore';
+import QuestionCard from '../../components/QuestionCard';
+import ResultCard from '../../components/ResultCard';
+import { useInterviewStore } from '../../services/interviewStore';
 import toast from 'react-hot-toast';
 
 export default function Interview() {

@@ -2,10 +2,13 @@ from sqlalchemy.orm import Session
 from app.models import models, schemas
 import json
 from datetime import datetime
+from app.services.ai_service import AIService
 
 class InterviewService:
+    def __init__(self):
+        self.ai_service = AIService()
     
-    def create_interview(self, db: Session, interview: schemas.InterviewCreate):
+    async def create_interview(self, db: Session, interview: schemas.InterviewCreate):
         """Create a new interview"""
         db_interview = models.Interview(
             user_id=interview.user_id,
@@ -17,37 +20,20 @@ class InterviewService:
         db.refresh(db_interview)
         
         # Generate initial questions
-        self.generate_questions(db, db_interview.id, interview.role)
+        await self.generate_questions(db, db_interview.id, interview.role)
         
         return db_interview
     
-    def generate_questions(self, db: Session, interview_id: int, role: str):
+    async def generate_questions(self, db: Session, interview_id: int, role: str):
         """Generate interview questions based on role"""
-        # Questions will be fetched from AI service
-        questions = [
-            {
-                "text": f"Tell me about your experience as a {role}?",
-                "category": "behavioral",
-                "order": 1
-            },
-            {
-                "text": f"What are your key strengths in {role} role?",
-                "category": "behavioral",
-                "order": 2
-            },
-            {
-                "text": "Can you walk through a challenging project you worked on?",
-                "category": "technical",
-                "order": 3
-            }
-        ]
+        questions = await self.ai_service.generate_questions(role, num_questions=5)
         
-        for q in questions:
+        for order, q in enumerate(questions, start=1):
             db_question = models.Question(
                 interview_id=interview_id,
                 question_text=q["text"],
-                category=q["category"],
-                order=q["order"]
+                category=q.get("category", "technical"),
+                order=order
             )
             db.add(db_question)
         
